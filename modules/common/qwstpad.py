@@ -123,19 +123,21 @@ class QwSTPad:
                 self.__released[key] = False
                 self.__changed[key] = True
                 self.__held[key] = True
-            if old_values[key] and not value:
+            elif old_values[key] and not value:
                 self.__pressed[key] = False
                 self.__released[key] = True
                 self.__changed[key] = True
                 self.__held[key] = False
-            if old_values[key] and value:
+            elif old_values[key] and value:
                 self.__pressed[key] = False
                 self.__released[key] = False
                 self.__changed[key] = False
                 self.__held[key] = True
 
     def pressed(self, button=None):
+        print(button)
         if button is None:
+            print(self.__pressed)
             return True in self.__pressed.values()
         return self.__pressed[button]
 
