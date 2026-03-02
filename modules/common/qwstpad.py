@@ -157,6 +157,7 @@ class QwSTPad:
     
     def held(self):
         return True in self.pressed.values
+        pass
 
 
 class Gamepadhelper:
