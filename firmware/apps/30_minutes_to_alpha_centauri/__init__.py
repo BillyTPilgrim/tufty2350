@@ -73,9 +73,10 @@ levels = [
 ]
 
 def init_gamepad():
+    global gamepad
     gamepads = qwstpad.Gamepadhelper()
     for i in gamepads.pads:
-        if not i == None:
+        if not i is None:
             gamepad = i
             return i
     return None
@@ -511,7 +512,7 @@ def update():
                     if gamepad.held() or gamepad.held("B") or gamepad.held("X") or gamepad.held("Y"):
                         z_increment = 2 * default_z_increment
                         player.boost = True
-                
+
                 except OSError:
                     gamepad = init_gamepad()
 

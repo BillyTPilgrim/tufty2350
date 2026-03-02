@@ -58,10 +58,10 @@ class QwSTPad:
             self.set_leds(self.address_code())
 
         self.buttons = self.read_buttons()
-        self.pressed = {}
-        self.released = {}
-        self.changed = {}
-        self.held = {}
+        self.__pressed = {}
+        self.__released = {}
+        self.__changed = {}
+        self.__held = {}
         self.update_buttons()
 
     def address_code(self):
@@ -114,49 +114,49 @@ class QwSTPad:
 
         for key, value in self.buttons.items():
             if old_values[key] == False and value == False:
-                self.pressed[key] = False
-                self.released[key] = False
-                self.changed[key] = False
-                self.held[key] = False
+                self.__pressed[key] = False
+                self.__released[key] = False
+                self.__changed[key] = False
+                self.__held[key] = False
             elif old_values[key] == False and value == True:
-                self.pressed[key] = True
-                self.released[key] = False
-                self.changed[key] = True
-                self.held[key] = True
+                self.__pressed[key] = True
+                self.__released[key] = False
+                self.__changed[key] = True
+                self.__held[key] = True
             if old_values[key] == True and value == False:
-                self.pressed[key] = False
-                self.released[key] = True
-                self.changed[key] = True
-                self.held[key] = False
+                self.__pressed[key] = False
+                self.__released[key] = True
+                self.__changed[key] = True
+                self.__held[key] = False
             if old_values[key] == True and value == True:
-                self.pressed[key] = False
-                self.released[key] = False
-                self.changed[key] = False
-                self.held[key] = True
+                self.__pressed[key] = False
+                self.__released[key] = False
+                self.__changed[key] = False
+                self.__held[key] = True
 
     def pressed(self, button):
-        return self.pressed[button]
+        return self.__pressed[button]
     
     def released(self, button):
-        return self.released[button]
+        return self.__released[button]
     
     def changed(self, button):
-        return self.changed[button]
+        return self.__changed[button]
     
     def held(self, button):
-        return self.held[button]
+        return self.__held[button]
     
     def pressed(self):
-        return True in self.pressed.values
+        return True in self.__pressed.values
     
     def released(self):
-        return True in self.pressed.values
+        return True in self.__pressed.values
     
     def changed(self):
-        return True in self.pressed.values
+        return True in self.__pressed.values
     
     def held(self):
-        return True in self.pressed.values
+        return True in self.__pressed.values
         pass
 
 
