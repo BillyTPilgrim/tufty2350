@@ -509,7 +509,7 @@ def update():
                         player.y_accel += 2
                     if gamepad.held("U") and player.y > 20:
                         player.y_accel -= 2
-                    if gamepad.held() or gamepad.held("B") or gamepad.held("X") or gamepad.held("Y"):
+                    if gamepad.held("A") or gamepad.held("B") or gamepad.held("X") or gamepad.held("Y"):
                         z_increment = 2 * default_z_increment
                         player.boost = True
 

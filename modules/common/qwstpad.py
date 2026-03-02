@@ -113,46 +113,46 @@ class QwSTPad:
         self.buttons = self.read_buttons()
 
         for key, value in self.buttons.items():
-            if old_values[key] == False and value == False:
+            if not old_values[key] and not value:
                 self.__pressed[key] = False
                 self.__released[key] = False
                 self.__changed[key] = False
                 self.__held[key] = False
-            elif old_values[key] == False and value == True:
+            elif not old_values[key] and value:
                 self.__pressed[key] = True
                 self.__released[key] = False
                 self.__changed[key] = True
                 self.__held[key] = True
-            if old_values[key] == True and value == False:
+            if old_values[key] and not value:
                 self.__pressed[key] = False
                 self.__released[key] = True
                 self.__changed[key] = True
                 self.__held[key] = False
-            if old_values[key] == True and value == True:
+            if old_values[key] and value:
                 self.__pressed[key] = False
                 self.__released[key] = False
                 self.__changed[key] = False
                 self.__held[key] = True
 
     def pressed(self, button=None):
-        if button:
-            return self.__pressed[button]
-        return True in self.__pressed.values()
+        if button is None:
+            return True in self.__pressed.values()
+        return self.__pressed[button]
 
     def released(self, button=None):
-        if button:
-            return self.__released[button]
-        return True in self.__released.values()
+        if button is None:
+            return True in self.__released.values()
+        return self.__released[button]
 
     def changed(self, button=None):
-        if button:
-            return self.__changed[button]
-        return True in self.__changed.values()
+        if button is None:
+            return True in self.__changed.values()
+        return self.__changed[button]
 
     def held(self, button=None):
-        if button:
-            return self.__held[button]
-        return True in self.__held.values()
+        if button is None:
+            return True in self.__held.values()
+        return self.__held[button]
 
 
 class Gamepadhelper:
