@@ -8,6 +8,7 @@ import math
 import random
 import cutscene
 import time
+import qwstpad
 
 hud = image.load("assets/hud.png")
 win = image.load("assets/win.png")
@@ -16,7 +17,6 @@ game_over = SpriteSheet("assets/game_over.png", 5, 1)
 ark_font = rom_font.ark
 screen.font = ark_font
 screen.antialias = image.OFF
-
 
 class GameState:
     INTRO = 1
@@ -57,6 +57,7 @@ congrat_choice = ""
 final_time = 0
 start_screen = 0
 fade_counter = 255
+gamepad = None
 
 
 # The level just stores the name and how much we want the walls to vary.
@@ -71,11 +72,19 @@ levels = [
     Level("hyperion", 0)
 ]
 
+def init_gamepad():
+    gamepads = qwstpad.Gamepadhelper()
+    for i in gamepads.pads:
+        if not i == None:
+            gamepad = i
+            return i
+    return None
 
 # This resets everythiong back to its starting conditions, including loading in level textures and picking the random values for the cargo, level and distance.
 def init_game():
-    global z_increment, z_offset, player, background, wall_tex, obst_tex, wall_variation, intro_cutscene, level_segments_passed, level_segments_total, congrat_choice, start_screen, fade_counter
+    global z_increment, z_offset, player, background, wall_tex, obst_tex, wall_variation, intro_cutscene, level_segments_passed, level_segments_total, congrat_choice, start_screen, fade_counter, gamepad
     level_seed = random.randint(0, len(levels) - 1)
+    gamepad = init_gamepad()
     current_level = levels[level_seed]
     background = image.load(f"assets/{current_level.texture_pack}_bg.png")
     wall_tex = SpriteSheet(f"assets/{current_level.texture_pack}_wall.png", 8, 1)
@@ -448,9 +457,8 @@ player = Player()
 segments = create_centre_points()
 init_game()
 
-
 def update():
-    global game_state, z_offset, z_increment, include_obstacle, level_start_time, level_segments_passed, final_time, start_screen, fade_counter
+    global game_state, z_offset, z_increment, include_obstacle, level_start_time, level_segments_passed, final_time, start_screen, fade_counter, gamepad
 
     # If we're in the intro, just cycle through the intro cutscene with any button press until
     # there's no more pages of it left, then switch the game mode to gameplay.
@@ -461,16 +469,51 @@ def update():
 
         intro_cutscene.draw()
 
+        if gamepad:
+            try:
+                gamepad.update_buttons()
+
+                if gamepad.pressed():
+                    if not intro_cutscene.advance():
+                        game_state = GameState.PLAYING
+                        level_start_time = time.ticks_ms()
+
+            except OSError:
+                gamepad = init_gamepad()
+
         if badge.pressed():
             if not intro_cutscene.advance():
                 game_state = GameState.PLAYING
                 level_start_time = time.ticks_ms()
 
+
     # If we're playing, advance time each tick and capture inputs.
     elif game_state == GameState.PLAYING:
 
+        z_increment = default_z_increment
+        player.boost = False
+
         # This check disables controls while fading in.
         if check_start():
+
+            if gamepad:
+                try:
+                    gamepad.update_buttons()
+
+                    if gamepad.held("L") and player.x > 20:
+                        player.x_accel -= 2
+                    elif gamepad.held("R") and player.x < screen.width - 20:
+                        player.x_accel += 2
+                    if gamepad.held("D") and player.y < screen.height - 20:
+                        player.y_accel += 2
+                    if gamepad.held("U") and player.y > 20:
+                        player.y_accel -= 2
+                    if gamepad.held() or gamepad.held("B") or gamepad.held("X") or gamepad.held("Y"):
+                        z_increment = 2 * default_z_increment
+                        player.boost = True
+                
+                except OSError:
+                    gamepad = init_gamepad()
 
             if badge.held(BUTTON_A) and player.x > 20:
                 player.x_accel -= 2
@@ -480,12 +523,9 @@ def update():
                 player.y_accel += 2
             if badge.held(BUTTON_UP) and player.y > 20:
                 player.y_accel -= 2
-            if badge.pressed(BUTTON_B):
-                z_increment *= 2
+            if badge.held(BUTTON_B):
+                z_increment = 2 * default_z_increment
                 player.boost = True
-            if badge.released(BUTTON_B):
-                z_increment /= 2
-                player.boost = False
 
         # Refresh the pkayer, draw the main screen and advance time.
         player.refresh()
@@ -559,6 +599,16 @@ def update():
         static = random.randint(0, 4)
         screen.blit(game_over.sprite(static, 0), rect(0, 0, screen.width, screen.height))
 
+        if gamepad:
+            try:
+                gamepad.update_buttons()
+
+                if gamepad.pressed():
+                    init_game()
+                    game_state = GameState.INTRO
+            except OSError:
+                gamepad = init_gamepad()
+
         if badge.pressed():
             init_game()
             game_state = GameState.INTRO
@@ -595,6 +645,16 @@ def update():
         time_text = f"Gets you {scoretotal} creds!"
         w, _ = screen.measure_text(time_text)
         screen.text(time_text, vec2((screen.width - w) / 2, 90))
+
+        if gamepad:
+            try:
+                gamepad.update_buttons()
+
+                if gamepad.pressed():
+                    init_game()
+                    game_state = GameState.INTRO
+            except OSError:
+                gamepad = init_gamepad()
 
         if badge.pressed():
             init_game()
