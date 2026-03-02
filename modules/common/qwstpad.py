@@ -134,30 +134,25 @@ class QwSTPad:
                 self.__changed[key] = False
                 self.__held[key] = True
 
-    def pressed(self, button):
-        return self.__pressed[button]
-    
-    def released(self, button):
-        return self.__released[button]
-    
-    def changed(self, button):
-        return self.__changed[button]
-    
-    def held(self, button):
-        return self.__held[button]
-    
-    def pressed(self):
-        return True in self.__pressed.values
-    
-    def released(self):
-        return True in self.__pressed.values
-    
-    def changed(self):
-        return True in self.__pressed.values
-    
-    def held(self):
-        return True in self.__pressed.values
-        pass
+    def pressed(self, button=None):
+        if button:
+            return self.__pressed[button]
+        return True in self.__pressed.values()
+
+    def released(self, button=None):
+        if button:
+            return self.__released[button]
+        return True in self.__released.values()
+
+    def changed(self, button=None):
+        if button:
+            return self.__changed[button]
+        return True in self.__changed.values()
+
+    def held(self, button=None):
+        if button:
+            return self.__held[button]
+        return True in self.__held.values()
 
 
 class Gamepadhelper:

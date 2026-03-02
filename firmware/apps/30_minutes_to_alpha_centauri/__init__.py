@@ -76,7 +76,7 @@ def init_gamepad():
     global gamepad
     gamepads = qwstpad.Gamepadhelper()
     for i in gamepads.pads:
-        if not i is None:
+        if i is not None:
             gamepad = i
             return i
     return None
