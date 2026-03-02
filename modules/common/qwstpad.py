@@ -109,7 +109,10 @@ class QwSTPad:
         return struct.unpack("<H", buffer)[0]
 
     def update_buttons(self):
-        old_values = self.buttons
+        old_values = {}
+        for key, value in self.buttons.items():
+            old_values[key] = value
+
         self.buttons = self.read_buttons()
 
         for key, value in self.buttons.items():
@@ -118,26 +121,24 @@ class QwSTPad:
                 self.__released[key] = False
                 self.__changed[key] = False
                 self.__held[key] = False
-            elif not old_values[key] and value:
+            if not old_values[key] and value:
                 self.__pressed[key] = True
                 self.__released[key] = False
                 self.__changed[key] = True
                 self.__held[key] = True
-            elif old_values[key] and not value:
+            if old_values[key] and not value:
                 self.__pressed[key] = False
                 self.__released[key] = True
                 self.__changed[key] = True
                 self.__held[key] = False
-            elif old_values[key] and value:
+            if old_values[key] and value:
                 self.__pressed[key] = False
                 self.__released[key] = False
                 self.__changed[key] = False
                 self.__held[key] = True
 
     def pressed(self, button=None):
-        print(button)
         if button is None:
-            print(self.__pressed)
             return True in self.__pressed.values()
         return self.__pressed[button]
 
