@@ -58,7 +58,7 @@ final_time = 0
 start_screen = 0
 fade_counter = 255
 gamepad = None
-
+controls = {}
 
 # The level just stores the name and how much we want the walls to vary.
 class Level:
@@ -454,12 +454,39 @@ def check_start():
     return fade_counter <= 0 and start_screen > num_segs
 
 
+def parse_controls():
+    global controls, gamepad
+
+    if gamepad:
+        try:
+            gamepad.update_buttons()
+        except OSError:
+            gamepad = init_gamepad()
+
+    if gamepad:
+        controls["MOVE_LEFT"] = badge.held(BUTTON_A) or gamepad.held("L")
+        controls["MOVE_RIGHT"] = badge.held(BUTTON_C) or gamepad.held("R")
+        controls["MOVE_DOWN"] = badge.held(BUTTON_DOWN) or gamepad.held("D")
+        controls["MOVE_UP"] = badge.held(BUTTON_UP) or gamepad.held("U")
+        controls["BOOST"] = badge.held(BUTTON_B) or gamepad.held("B")
+        controls["ANY_KEY"] = badge.pressed() or gamepad.pressed()
+    else:
+        controls["MOVE_LEFT"] = badge.held(BUTTON_A)
+        controls["MOVE_RIGHT"] = badge.held(BUTTON_C)
+        controls["MOVE_DOWN"] = badge.held(BUTTON_DOWN)
+        controls["MOVE_UP"] = badge.held(BUTTON_UP)
+        controls["BOOST"] = badge.held(BUTTON_B)
+        controls["ANY_KEY"] = badge.pressed()
+
+
 player = Player()
 segments = create_centre_points()
 init_game()
 
 def update():
-    global game_state, z_offset, z_increment, include_obstacle, level_start_time, level_segments_passed, final_time, start_screen, fade_counter, gamepad
+    global game_state, z_offset, z_increment, include_obstacle, level_start_time, level_segments_passed, final_time, start_screen, fade_counter
+
+    parse_controls()
 
     # If we're in the intro, just cycle through the intro cutscene with any button press until
     # there's no more pages of it left, then switch the game mode to gameplay.
@@ -470,19 +497,7 @@ def update():
 
         intro_cutscene.draw()
 
-        if gamepad:
-            try:
-                gamepad.update_buttons()
-
-                if gamepad.pressed():
-                    if not intro_cutscene.advance():
-                        game_state = GameState.PLAYING
-                        level_start_time = time.ticks_ms()
-
-            except OSError:
-                gamepad = init_gamepad()
-
-        if badge.pressed():
+        if controls["ANY_KEY"]:
             if not intro_cutscene.advance():
                 game_state = GameState.PLAYING
                 level_start_time = time.ticks_ms()
@@ -496,35 +511,15 @@ def update():
 
         # This check disables controls while fading in.
         if check_start():
-
-            if gamepad:
-                try:
-                    gamepad.update_buttons()
-
-                    if gamepad.held("L") and player.x > 20:
-                        player.x_accel -= 2
-                    elif gamepad.held("R") and player.x < screen.width - 20:
-                        player.x_accel += 2
-                    if gamepad.held("D") and player.y < screen.height - 20:
-                        player.y_accel += 2
-                    if gamepad.held("U") and player.y > 20:
-                        player.y_accel -= 2
-                    if gamepad.held("A") or gamepad.held("B") or gamepad.held("X") or gamepad.held("Y"):
-                        z_increment = 2 * default_z_increment
-                        player.boost = True
-
-                except OSError:
-                    gamepad = init_gamepad()
-
-            if badge.held(BUTTON_A) and player.x > 20:
+            if controls["MOVE_LEFT"] and player.x > 20:
                 player.x_accel -= 2
-            elif badge.held(BUTTON_C) and player.x < screen.width - 20:
+            elif controls["MOVE_RIGHT"] and player.x < screen.width - 20:
                 player.x_accel += 2
-            if badge.held(BUTTON_DOWN) and player.y < screen.height - 20:
+            if controls["MOVE_DOWN"] and player.y < screen.height - 20:
                 player.y_accel += 2
-            if badge.held(BUTTON_UP) and player.y > 20:
+            if controls["MOVE_UP"] and player.y > 20:
                 player.y_accel -= 2
-            if badge.held(BUTTON_B):
+            if controls["BOOST"]:
                 z_increment = 2 * default_z_increment
                 player.boost = True
 
@@ -600,17 +595,7 @@ def update():
         static = random.randint(0, 4)
         screen.blit(game_over.sprite(static, 0), rect(0, 0, screen.width, screen.height))
 
-        if gamepad:
-            try:
-                gamepad.update_buttons()
-
-                if gamepad.pressed():
-                    init_game()
-                    game_state = GameState.INTRO
-            except OSError:
-                gamepad = init_gamepad()
-
-        if badge.pressed():
+        if controls["ANY_KEY"]:
             init_game()
             game_state = GameState.INTRO
 
@@ -647,17 +632,7 @@ def update():
         w, _ = screen.measure_text(time_text)
         screen.text(time_text, vec2((screen.width - w) / 2, 90))
 
-        if gamepad:
-            try:
-                gamepad.update_buttons()
-
-                if gamepad.pressed():
-                    init_game()
-                    game_state = GameState.INTRO
-            except OSError:
-                gamepad = init_gamepad()
-
-        if badge.pressed():
+        if controls["ANY_KEY"]:
             init_game()
             game_state = GameState.INTRO
 
