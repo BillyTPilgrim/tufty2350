@@ -62,6 +62,8 @@ def parse_controls():
 def update():
     global active, apps, alpha
 
+    parse_controls()
+
     # process button inputs to switch between apps
     if controls["MOVE_RIGHT"]:
         if (active % 3) < 2 and active < len(apps) - 1:
